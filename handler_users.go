@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Captain-Leftovers/rss_feed_collector/internal/auth"
 	"github.com/Captain-Leftovers/rss_feed_collector/internal/database"
-    
+
 	"github.com/google/uuid"
 )
 
@@ -47,17 +48,13 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 
 func (cfg apiConfig) handlerGetCurrentUserInfo(w http.ResponseWriter, r *http.Request){
 
-    authHeader := r.Header.Get("Authorization")
-    if authHeader == ""{
-        respondWithError(w, http.StatusUnauthorized, "Authorization header is required")
+   apiKey, err := auth.GetAPIKey(r.Header)
+   
+    if err != nil {
+        respondWithError(w, http.StatusUnauthorized, "No authorization api key included in request")
         return
     }
-    if authHeader[:6] != "ApiKey" {
-        respondWithError(w, http.StatusUnauthorized, "Authorization header must start with 'ApiKey'")
-        return
-    }
-
-    apiKey := authHeader[7:]
+  
 
     dbUser, err := cfg.DB.GetUserByAPIKey(r.Context(), apiKey)
 
