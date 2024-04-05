@@ -53,6 +53,9 @@ func main() {
 
     mux.HandleFunc("POST /v1/users", apiCfg.handlerUsersCreate)
 
+    mux.HandleFunc("GET /v1/users", apiCfg.handlerGetCurrentUserInfo)
+
+
 
     corsMux := corsMiddleware(mux)
 

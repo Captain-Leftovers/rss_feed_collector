@@ -43,3 +43,32 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 
     respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
+
+
+func (cfg apiConfig) handlerGetCurrentUserInfo(w http.ResponseWriter, r *http.Request){
+
+    authHeader := r.Header.Get("Authorization")
+    if authHeader == ""{
+        respondWithError(w, http.StatusUnauthorized, "Authorization header is required")
+        return
+    }
+    if authHeader[:6] != "ApiKey" {
+        respondWithError(w, http.StatusUnauthorized, "Authorization header must start with 'ApiKey'")
+        return
+    }
+
+    apiKey := authHeader[7:]
+
+    dbUser, err := cfg.DB.GetUserByAPIKey(r.Context(), apiKey)
+
+    if err != nil {
+        respondWithError(w, http.StatusNotFound, "User with the given ApiKey not found")
+        return
+    }
+
+
+
+    
+
+    respondWithJSON(w, http.StatusOK, databaseUserToUser(dbUser))
+}
